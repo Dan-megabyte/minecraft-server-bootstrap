@@ -31,6 +31,36 @@ function install_file() {
 	chmod "$4" "$2" || die "Could not chmod '$2'"
 }
 
+# $1: Variable to store result array into
+# $2: Prompt (string)
+function ask_array() {
+	# Indirectly reference result array
+	declare -n ref=$1
+	ref=()
+
+	# Prompt the user for their choice(s)
+	flush_stdin
+	read -r -p "$2" ref < $TTY || die "Error in read"
+
+	# Check if input is empty (user selected none)
+	if [ -z "$ref" ]; then
+		ask_array $1 $2
+	fi
+}
+
+# $1: Directory FROM
+# $2: Directory TO (NO END SLASH)
+function install_folder() {
+	for d in $(find "$1" -type d -printf '%P\n'); do
+		mkdir -p -m700 "$2/$d" || die "Could not create directory '$d'"
+		chown minecraft: "$2/$d" || die "Could not chown directory '$d'"
+	done
+
+	for f in $(find "$1" -type f -printf '%P\n'); do
+		install_file "$2/$f" "$2/$f" minecraft: 600
+	done
+}
+
 ################################################################
 # Ensure that all required tools are installed
 
@@ -116,69 +146,99 @@ fi
 cd deploy \
 	|| die "Could not change into deploy directory"
 
-status "Configuring server"
-install_file <(echo "eula=true") server/eula.txt minecraft: 600
+################################################################
+# Setup Velocity Proxy Server
+status "Setting up velocity proxy server"
 
-for d in $(find contrib/default_config -type d -printf '%P\n'); do
-	mkdir -p -m700 "$d" || die "Could not create directory '$d'"
-	chown minecraft: "$d" || die "Could not chown directory '$d'"
-done
-
-for f in $(find contrib/default_config -type f -printf '%P\n'); do
-	install_file contrib/default_config/"$f" "$f" minecraft: 600
-done
-
+# generate and deploy velocity secret
 VELOCITYSECRET=$(openssl rand -base64 16) \
 	|| die "Could not generate velocity secret"
 install_file <(echo -n "$VELOCITYSECRET") proxy/forwarding.secret minecraft: 600
-sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' server/config/paper-global.yml \
-	|| die "Could not insert velocity secret in paper-global.yml"
 
-echo "Depending on your player base, you might want to allow certain gamplay"
-echo "exploits on your server. These are fixed by default in PaperMC, but would"
-echo "allow your players to build certain vanilla machines (TNT blast chambers,"
-echo "bedrock removal, ...). My personal recommendation is to answer with yes"
-echo "to all of these questions."
-echo
+# deploy default velocity config
+install_folder "contrib/default_config/proxy" "proxy"
 
-if ask "Allow headless pistons and bedrock breaking?"; then
-	sed -i 's|allow-headless-pistons: false|allow-headless-pistons: true|' server/config/paper-global.yml \
-		|| die "Could not replace allow-headless-pistons config"
-	sed -i 's|allow-permanent-block-break-exploits: false|allow-permanent-block-break-exploits: true|' server/config/paper-global.yml \
-		|| die "Could not replace allow-permanent-block-break-exploits config"
+################################################################
+# Setup backend Minecraft Servers
+
+status "Setting up backend minecraft servers"
+
+server_names=()
+ask_array server_names "What are the names of the backend servers that you want to install?: "
+
+delete_default="false"
+if ask 'Afterwards, do you want to delete the default server template named "default"?'; then
+	delete_default="true"
+elif ask 'Would you like to configure it too then?'; then
+	server_names+="default"
 fi
 
-if ask "Allow piston TNT duping?"; then
-	sed -i 's|allow-piston-duplication: false|allow-piston-duplication: true|' server/config/paper-global.yml \
-		|| die "Could not replace allow-piston-duplication config"
+for server_name in $server_names; do
+	if [ "$server_name" != "default" ]; then
+		status "Copying default server template"
+		install_folder "servers/default" "servers/$server_name"
+	fi
+
+	status "Configuring $server_name server"
+	install_file <(echo "eula=true") "servers/$($server_name)/eula.txt" minecraft: 600
+
+	install_folder "contrib/default_config/server" "servers/$($server_name)"
+
+	sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' server/config/paper-global.yml \
+		|| die "Could not insert velocity secret in paper-global.yml"
+
+	echo "Depending on your player base, you might want to allow certain gamplay"
+	echo "exploits on your server. These are fixed by default in PaperMC, but would"
+	echo "allow your players to build certain vanilla machines (TNT blast chambers,"
+	echo "bedrock removal, ...). My personal recommendation is to answer with yes"
+	echo "to all of these questions."
+	echo
+
+	if ask "Allow headless pistons and bedrock breaking?"; then
+		sed -i 's|allow-headless-pistons: false|allow-headless-pistons: true|' servers/$($server_name)/config/paper-global.yml \
+			|| die "Could not replace allow-headless-pistons config"
+		sed -i 's|allow-permanent-block-break-exploits: false|allow-permanent-block-break-exploits: true|' servers/$($server_name)/config/paper-global.yml \
+			|| die "Could not replace allow-permanent-block-break-exploits config"
+	fi
+
+	if ask "Allow piston TNT duping?"; then
+		sed -i 's|allow-piston-duplication: false|allow-piston-duplication: true|' servers/$($server_name)/config/paper-global.yml \
+			|| die "Could not replace allow-piston-duplication config"
+	fi
+
+	if ask "Enable Anti-XRAY?"; then
+		sed -i 's|false # ANTI_XRAY|true|' servers/$($server_name)/config/paper-world-defaults.yml \
+			|| die "Could not replace ANTI_XRAY config"
+	else
+		sed -i 's|false # ANTI_XRAY|false|' servers/$($server_name)/config/paper-world-defaults.yml \
+			|| die "Could not replace ANTI_XRAY config"
+	fi
+
+	if ask "Replenish loot in loot chests after 1-2 realtime days?"; then
+		sed -i 's|auto-replenish: false|auto-replenish: true|' servers/$($server_name)/config/paper-world-defaults.yml \
+			|| die "Could not replace auto-replenish config"
+	fi
+
+	if ask "Disable hopper item move event to reduce lag?"; then
+		sed -i 's|disable-move-event: false|disable-move-event: true|' servers/$($server_name)/config/paper-world-defaults.yml \
+			|| die "Could not replace disable-move-event config"
+	fi
+
+	if ask "Increase view-distance to 15 chunks?"; then
+		sed -i 's|view-distance=10|view-distance=15|' servers/$($server_name)/server.properties \
+			|| die "Could not replace view-distance config"
+	fi
+done
+
+if [ "$delete_default" == "true" ]; then
+	status 'deleting "default" template server'
+	rm -r "servers/default"
 fi
 
-if ask "Enable Anti-XRAY?"; then
-	sed -i 's|false # ANTI_XRAY|true|' server/config/paper-world-defaults.yml \
-		|| die "Could not replace ANTI_XRAY config"
-else
-	sed -i 's|false # ANTI_XRAY|false|' server/config/paper-world-defaults.yml \
-		|| die "Could not replace ANTI_XRAY config"
+if ask "Download all initial server files through update.sh?"; then
+	runuser -u minecraft -- ./update.sh < "$TTY" \
+		|| die "Could not update server files"
 fi
-
-if ask "Replenish loot in loot chests after 1-2 realtime days?"; then
-	sed -i 's|auto-replenish: false|auto-replenish: true|' server/config/paper-world-defaults.yml \
-		|| die "Could not replace auto-replenish config"
-fi
-
-if ask "Disable hopper item move event to reduce lag?"; then
-	sed -i 's|disable-move-event: false|disable-move-event: true|' server/config/paper-world-defaults.yml \
-		|| die "Could not replace disable-move-event config"
-fi
-
-if ask "Increase view-distance to 15 chunks?"; then
-	sed -i 's|view-distance=10|view-distance=15|' server/server.properties \
-		|| die "Could not replace view-distance config"
-fi
-
-echo
-runuser -u minecraft -- ./update.sh < "$TTY" \
-	|| die "Could not update server files"
 
 
 ################################################################
@@ -198,6 +258,11 @@ echo "If you want to adjust any proxy related configuration, you may want to sta
 echo "them manually later.[m"
 echo
 
+services=" minecraft-proxy"
+for server_name in $server_names; do
+	services+=" minecraft-server@$server_name"
+done
+
 postponed_service_message=""
 if ask "Enable and start system services now?"; then
 	systemctl enable --now minecraft-server minecraft-proxy < "$TTY" \
@@ -207,7 +272,7 @@ else
 You have postponed enabling the system services. Make sure to execute the
 following command when you are ready to start the server:
 
-[1;32m    systemctl enable --now minecraft-server minecraft-proxy[m
+[1;32m    systemctl enable --now $services[m
 "
 fi
 
