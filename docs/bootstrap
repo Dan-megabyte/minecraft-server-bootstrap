@@ -176,7 +176,7 @@ fi
 
 for server_name in $server_names; do
 	if [ "$server_name" != "default" ]; then
-		status "Copying default server template"
+		echo "Copying default server template"
 		install_folder "servers/default" "servers/$server_name"
 	fi
 
@@ -238,7 +238,7 @@ fi
 
 if ask "Download all initial server files through update.sh?"; then
 	runuser -u minecraft -- ./update.sh < "$TTY" \
-		|| die "Could not update server files"
+		|| echo "Could not update server files, continuing later"
 fi
 
 
