@@ -57,7 +57,7 @@ function install_folder() {
 	done
 
 	for f in $(find "$1" -type f -printf '%P\n'); do
-		install_file "$2/$f" "$2/$f" minecraft: 600
+		install_file "$1/$f" "$2/$f" minecraft: 600
 	done
 }
 
