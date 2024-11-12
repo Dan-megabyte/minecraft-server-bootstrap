@@ -51,6 +51,7 @@ function ask_array() {
 # $1: Directory FROM
 # $2: Directory TO (NO END SLASH)
 function install_folder() {
+	mkdir -p -m700 "$2" || die "Could not create directory '$d'"
 	for d in $(find "$1" -type d -printf '%P\n'); do
 		mkdir -p -m700 "$2/$d" || die "Could not create directory '$d'"
 		chown minecraft: "$2/$d" || die "Could not chown directory '$d'"
