@@ -185,7 +185,7 @@ for server_name in $server_names; do
 
 	install_folder "contrib/default_config/server" "servers/$server_name"
 
-	sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' server/config/paper-global.yml \
+	sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' "servers/$server_name"/config/paper-global.yml \
 		|| die "Could not insert velocity secret in paper-global.yml"
 
 	echo "Depending on your player base, you might want to allow certain gamplay"
