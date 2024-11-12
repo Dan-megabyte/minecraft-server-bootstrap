@@ -180,6 +180,11 @@ for server_name in $server_names; do
 		install_folder "servers/default" "servers/$server_name"
 	fi
 
+	# fix permission issues
+	for f in $(find "servers/$server_name/*.sh" -type f -printf '%P\n'); do
+		chmod "u+x" "$f" || die "Could not chmod '$f'"
+	done
+
 	status "Configuring $server_name server"
 	install_file <(echo "eula=true") "servers/$server_name"/eula.txt minecraft: 600
 
