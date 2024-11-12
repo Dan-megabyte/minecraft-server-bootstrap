@@ -183,7 +183,7 @@ for server_name in $server_names; do
 	fi
 
 	# fix permission issues
-	for f in $(find "servers/$server_name/*.sh" -type f -printf '%P\n'); do
+	for f in $(find "servers/$server_name/" -type f -name "*.sh"); do
 		chmod "u+x" "$f" || die "Could not chmod '$f'"
 	done
 
