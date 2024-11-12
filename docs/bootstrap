@@ -181,9 +181,9 @@ for server_name in $server_names; do
 	fi
 
 	status "Configuring $server_name server"
-	install_file <(echo "eula=true") "servers/$($server_name)/eula.txt" minecraft: 600
+	install_file <(echo "eula=true") "servers/$server_name"/eula.txt minecraft: 600
 
-	install_folder "contrib/default_config/server" "servers/$($server_name)"
+	install_folder "contrib/default_config/server" "servers/$server_name"
 
 	sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' server/config/paper-global.yml \
 		|| die "Could not insert velocity secret in paper-global.yml"
@@ -196,37 +196,37 @@ for server_name in $server_names; do
 	echo
 
 	if ask "Allow headless pistons and bedrock breaking?"; then
-		sed -i 's|allow-headless-pistons: false|allow-headless-pistons: true|' servers/$($server_name)/config/paper-global.yml \
+		sed -i 's|allow-headless-pistons: false|allow-headless-pistons: true|' "servers/$server_name"/config/paper-global.yml \
 			|| die "Could not replace allow-headless-pistons config"
-		sed -i 's|allow-permanent-block-break-exploits: false|allow-permanent-block-break-exploits: true|' servers/$($server_name)/config/paper-global.yml \
+		sed -i 's|allow-permanent-block-break-exploits: false|allow-permanent-block-break-exploits: true|' "servers/$server_name"/config/paper-global.yml \
 			|| die "Could not replace allow-permanent-block-break-exploits config"
 	fi
 
 	if ask "Allow piston TNT duping?"; then
-		sed -i 's|allow-piston-duplication: false|allow-piston-duplication: true|' servers/$($server_name)/config/paper-global.yml \
+		sed -i 's|allow-piston-duplication: false|allow-piston-duplication: true|' "servers/$server_name"/config/paper-global.yml \
 			|| die "Could not replace allow-piston-duplication config"
 	fi
 
 	if ask "Enable Anti-XRAY?"; then
-		sed -i 's|false # ANTI_XRAY|true|' servers/$($server_name)/config/paper-world-defaults.yml \
+		sed -i 's|false # ANTI_XRAY|true|' "servers/$server_name"/config/paper-world-defaults.yml \
 			|| die "Could not replace ANTI_XRAY config"
 	else
-		sed -i 's|false # ANTI_XRAY|false|' servers/$($server_name)/config/paper-world-defaults.yml \
+		sed -i 's|false # ANTI_XRAY|false|' "servers/$server_name"/config/paper-world-defaults.yml \
 			|| die "Could not replace ANTI_XRAY config"
 	fi
 
 	if ask "Replenish loot in loot chests after 1-2 realtime days?"; then
-		sed -i 's|auto-replenish: false|auto-replenish: true|' servers/$($server_name)/config/paper-world-defaults.yml \
+		sed -i 's|auto-replenish: false|auto-replenish: true|' "servers/$server_name"/config/paper-world-defaults.yml \
 			|| die "Could not replace auto-replenish config"
 	fi
 
 	if ask "Disable hopper item move event to reduce lag?"; then
-		sed -i 's|disable-move-event: false|disable-move-event: true|' servers/$($server_name)/config/paper-world-defaults.yml \
+		sed -i 's|disable-move-event: false|disable-move-event: true|' "servers/$server_name"/config/paper-world-defaults.yml \
 			|| die "Could not replace disable-move-event config"
 	fi
 
 	if ask "Increase view-distance to 15 chunks?"; then
-		sed -i 's|view-distance=10|view-distance=15|' servers/$($server_name)/server.properties \
+		sed -i 's|view-distance=10|view-distance=15|' "servers/$server_name"/server.properties \
 			|| die "Could not replace view-distance config"
 	fi
 done
