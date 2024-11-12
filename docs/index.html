@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Oddlama's Minecraft Server Installer</title>
+		<title>Dan's Forked Minecraft Server Installer</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<meta name="description" content="">
@@ -35,12 +35,12 @@
 				<div class="px-4 text-center">
 					<div class="mb-4 inline-flex justify-center items-center">
 						<img class="h-24 w-24 min-w-[6rem] min-h-[6rem] lg:h-32 lg:w-32 lg:min-w-[8rem] lg:min-h-[8rem]" src="logo.png" alt="Logo">
-						<h1 class="px-4 text-3xl font-extrabold tracking-tight leading-none text-gray-900 md:text-4xl lg:text-5xl dark:text-white">Oddlama's<br/>Minecraft Server Installer</h1>
+						<h1 class="px-4 text-3xl font-extrabold tracking-tight leading-none text-gray-900 md:text-4xl lg:text-5xl dark:text-white">Oddlama's<br/>Forked Minecraft Server Installer</h1>
 					</div>
-					<p class="mb-8 text-xl font-normal text-gray-500 lg:px-16 dark:text-gray-400">A simple but fully-featured minecraft server installer for linux. Comes with autostart, 3d online map, vane, account multiplexing, update script and more. After installation you can modify everything to your liking.</p>
+					<p class="mb-8 text-xl font-normal text-gray-500 lg:px-16 dark:text-gray-400">A simple but fully-featured minecraft server network installer for linux. Comes with autostart, 3d online map, vane, account multiplexing, update script and more. After installation you can modify everything to your liking.</p>
 					<div class="flex flex-col mb-4 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
 						<div class="inline-flex justify-center rounded-lr shadow-sm" role="group">
-							<a href="https://github.com/oddlama/minecraft-server" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-l-lg border-l border-t border-b border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+							<a href="https://github.com/Dan-megabyte/minecraft-server-bootstrap" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-l-lg border-l border-t border-b border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
 								<div class="-ml-1 mr-2 w-5 h-5 fa-brands fa-github text-lg"></div>
 								GitHub
 							</a>
@@ -55,9 +55,9 @@
 			<section class="my-8">
 				<h3 class="py-6 text-center text-2xl font-bold tracking-tight leading-none text-gray-900 dark:text-white">Installation</h3>
 				<div class="overflow-x-auto justify-center items-center p-3 text-center rounded-lg bg-slate-800">
-					<pre class="mx-5 text-center text-xl font-medium text-slate-300"><code>curl <span class="text-pink-400">-sL</span> <span class="text-sky-300">https://oddlama.github.io/minecraft-server/bootstrap</span> <span class="text-slate-500">|</span> sudo bash</code></pre>
+					<pre class="mx-5 text-center text-xl font-medium text-slate-300"><code>curl <span class="text-pink-400">-sL</span> <span class="text-sky-300">https://Dan-megabyte.github.io/minecraft-server-bootstrap/bootstrap</span> <span class="text-slate-500">|</span> sudo bash</code></pre>
 				</div>
-				<div class="p-5 text-center"><a href="https://github.com/oddlama/minecraft-server" class="text-md text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:dark:text-gray-200">Visit the GitHub page for more information.</a></div>
+				<div class="p-5 text-center"><a href="https://github.com/Dan-megabyte/minecraft-server-bootstrap" class="text-md text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:dark:text-gray-200">Visit the GitHub page for more information.</a></div>
 			</section>
 			<section class="my-8">
 				<h3 class="py-6 text-center text-2xl font-bold tracking-tight leading-none text-gray-900 dark:text-white">Features</h3>
@@ -122,7 +122,7 @@
 	</script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
-			fetch('https://api.github.com/repos/oddlama/minecraft-server')
+			fetch('https://api.github.com/repos/Dan-megabyte/minecraft-server-bootstrap')
 				.then(response => response.json()
 					.then(json => document.getElementById('starcount').innerText = json['stargazers_count']));
 		});
