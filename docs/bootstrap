@@ -6,6 +6,7 @@ umask 077
 TTY="/dev/$(ps -p $$ -o tty=)"
 
 install_dir="/var/lib/minecraft"
+declare -i server_port_range_offset=25000
 
 ################################################################
 # Helper functions
@@ -176,6 +177,7 @@ elif ask 'Would you like to configure it too then?'; then
 	server_names+="default"
 fi
 
+declare -i server_num=1
 for server_name in $server_names; do
 	if [ "$server_name" != "default" ]; then
 		echo "Copying default server template"
@@ -191,6 +193,9 @@ for server_name in $server_names; do
 	install_file <(echo "eula=true") "servers/$server_name"/eula.txt minecraft: 600
 
 	install_folder "contrib/default_config/server" "servers/$server_name"
+
+	sed -i 's|{{SERVER_PORT}}|'"$(($SERVER_PORT_OFFSET+$server_num))"'|' "servers/$server_name"/server.properties \
+		|| die "Could not insert server port into server.properties"
 
 	sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' "servers/$server_name"/config/paper-global.yml \
 		|| die "Could not insert velocity secret in paper-global.yml"
@@ -236,6 +241,8 @@ for server_name in $server_names; do
 		sed -i 's|view-distance=10|view-distance=15|' "servers/$server_name"/server.properties \
 			|| die "Could not replace view-distance config"
 	fi
+
+	server_num+=1
 done
 
 if [ "$delete_default" == "true" ]; then
