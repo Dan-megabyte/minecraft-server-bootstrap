@@ -6,7 +6,7 @@ umask 077
 TTY="/dev/$(ps -p $$ -o tty=)"
 
 install_dir="/var/lib/minecraft"
-declare -i server_port_range_offset=25000
+declare -i server_port_range_offset=25500
 
 ################################################################
 # Helper functions
@@ -199,6 +199,13 @@ for server_name in $server_names; do
 
 	sed -i 's|{{VELOCITYSECRET}}|'"$VELOCITYSECRET"'|' "servers/$server_name"/config/paper-global.yml \
 		|| die "Could not insert velocity secret in paper-global.yml"
+
+	local proxy_config_line="$server_name"
+	proxy_config_line+=' = "127.0.0.1:'
+	proxy_config_line+="$(($SERVER_PORT_OFFSET+$server_num))"
+	proxy_config_line+='"'
+	sed -i 's/\[servers\]/\[servers\]\n'"$proxy_config_line/" 'proxy/velocity.toml' \
+		|| die 'Could not insert proxy config line into velocity.toml'
 
 	echo "Depending on your player base, you might want to allow certain gamplay"
 	echo "exploits on your server. These are fixed by default in PaperMC, but would"
