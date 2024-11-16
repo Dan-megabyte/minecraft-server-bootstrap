@@ -5,7 +5,7 @@ set -uo pipefail
 umask 077
 TTY="/dev/$(ps -p $$ -o tty=)"
 
-INSTALL_DIR="/var/lib/minecraft"
+INSTALL_DIR="/srv/minecraft"
 DEPLOY_DIR='deploy'
 declare -i SERVER_PORT_OFFSET=25500
 
