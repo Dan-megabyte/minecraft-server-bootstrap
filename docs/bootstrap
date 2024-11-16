@@ -7,7 +7,7 @@ TTY="/dev/$(ps -p $$ -o tty=)"
 
 INSTALL_DIR="/var/lib/minecraft"
 DEPLOY_DIR='deploy'
-declare -i server_port_range_offset=25500
+declare -i SERVER_PORT_OFFSET=25500
 
 ################################################################
 # Helper functions
