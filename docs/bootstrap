@@ -6,6 +6,7 @@ umask 077
 TTY="/dev/$(ps -p $$ -o tty=)"
 
 INSTALL_DIR="/var/lib/minecraft"
+DEPLOY_DIR='deploy'
 declare -i server_port_range_offset=25500
 
 ################################################################
@@ -126,8 +127,8 @@ chown minecraft: $INSTALL_DIR
 ################################################################
 # Setup repository
 
-if [[ -e $INSTALL_DIR"/deploy" ]]; then
-	echo "[33mThe deploy directory $INSTALL_DIR/deploy already exists."
+if [[ -e $INSTALL_DIR"/$DEPLOY_DIR" ]]; then
+	echo "[33mThe deploy directory $INSTALL_DIR/$DEPLOY_DIR already exists."
 	echo "You can still run the installer again, but it may overwrite some"
 	echo "configuration files if you edited them in the meantime.[m"
 	ask "Are you sure you want to continue?" \
@@ -137,17 +138,17 @@ fi
 cd $INSTALL_DIR \
 	|| die "Could not change into $INSTALL_DIR"
 
-if [[ -e deploy ]]; then
+if [[ -e $DEPLOY_DIR ]]; then
 	status "Updating deploy repository"
-	runuser -u minecraft -- git -C deploy pull \
+	runuser -u minecraft -- git -C $DEPLOY_DIR pull \
 		|| die "Could not pull repository"
 else
 	status "Cloning deploy repository"
-	runuser -u minecraft -- git clone "https://github.com/Dan-megabyte/minecraft-server-bootstrap" deploy \
+	runuser -u minecraft -- git clone "https://github.com/Dan-megabyte/minecraft-server-bootstrap" $DEPLOY_DIR \
 		|| die "Could not clone repository"
 fi
 
-cd deploy \
+cd $DEPLOY_DIR \
 	|| die "Could not change into deploy directory"
 
 ################################################################
@@ -267,7 +268,7 @@ fi
 # Install systemd services
 
 status "Installing service files"
-./contrib/install.sh "$INSTALL_DIR/deploy" < "$TTY" \
+./contrib/install.sh "$INSTALL_DIR/$DEPLOY_DIR" < "$TTY" \
 	|| die "Error while installing service files"
 
 
